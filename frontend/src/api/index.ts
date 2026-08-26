@@ -1,10 +1,15 @@
 import type { Task } from '../types';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string, public data?: any) {
+  status: number;
+  data?: any;
+
+  constructor(status: number, message: string, data?: any) {
     super(message);
+    this.status = status;
+    this.data = data;
   }
 }
 
