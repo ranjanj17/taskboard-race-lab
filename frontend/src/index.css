@@ -1,0 +1,7 @@
+/* Cleaned to prevent conflicts with App.css */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #0f172a; /* Slate 900 */
+}
