@@ -15,6 +15,7 @@ interface TaskState {
   fetchTasks: (params: { search?: string; status?: string; priority?: string }) => Promise<void>;
   createTask: (task: Partial<Task>) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
 }
 
 let fetchController: AbortController | null = null;
@@ -100,6 +101,31 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         // Handle conflict
         set({ conflictTask: err.data.task });
       }
+      throw err;
+    }
+  },
+  
+  deleteTask: async (id) => {
+    const { tasks } = get();
+    const taskIndex = tasks.findIndex(t => t.id === id);
+    if (taskIndex === -1) return;
+    
+    const originalTask = tasks[taskIndex];
+    
+    // Optimistic Update
+    set({
+      tasks: tasks.filter(t => t.id !== id)
+    });
+    
+    try {
+      await api.deleteTask(id);
+    } catch (err: any) {
+      // Rollback on failure
+      set((state) => {
+        const newTasks = [...state.tasks];
+        newTasks.splice(taskIndex, 0, originalTask);
+        return { tasks: newTasks };
+      });
       throw err;
     }
   }

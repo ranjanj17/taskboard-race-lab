@@ -49,4 +49,14 @@ export const api = {
     });
     return handleResponse(res);
   },
+
+  deleteTask: async (id: string): Promise<void> => {
+    const res = await fetch(`${API_URL}/tasks/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new ApiError(res.status, errorData.message || res.statusText, errorData);
+    }
+  },
 };
