@@ -76,13 +76,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ task, onSuccess, onCancel })
 
       <div className="form-group">
         <label>Assignee</label>
-        <select value={assignee} onChange={e => setAssignee(e.target.value)} disabled={isSubmitting}>
-          <option value="">Unassigned</option>
-          <option value="Alice">Alice</option>
-          <option value="Bob">Bob</option>
-          <option value="Charlie">Charlie</option>
-          <option value="David">David</option>
-        </select>
+        <input 
+          list="assignee-list" 
+          value={assignee} 
+          onChange={e => setAssignee(e.target.value)} 
+          disabled={isSubmitting}
+          placeholder="Select or type a name..."
+        />
+        <datalist id="assignee-list">
+          <option value="Alice" />
+          <option value="Bob" />
+          <option value="Charlie" />
+          <option value="David" />
+        </datalist>
       </div>
 
       <div className="form-actions">
