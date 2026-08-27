@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTaskStore } from '../store/taskStore';
 import { TaskList } from './TaskList';
@@ -9,23 +9,44 @@ export const TaskBoard: React.FC = () => {
   const { fetchTasks, isLoading, error, conflictTask, setConflictTask } = useTaskStore();
   
   const search = searchParams.get('search') || '';
+  const [localSearch, setLocalSearch] = useState(search);
+  
   const status = searchParams.get('status') || 'all';
   const priority = searchParams.get('priority') || 'all';
   const selectedTaskId = searchParams.get('taskId');
   const isCreating = searchParams.get('create') === 'true';
+
+  // Sync local search if URL changes externally
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  // Debounce logic for search
+  useEffect(() => {
+    // Prevent setting a timeout if the local search is already in sync with the URL
+    if (localSearch === search) return;
+
+    const timer = setTimeout(() => {
+      setSearchParams((prevParams) => {
+        const newParams = new URLSearchParams(prevParams);
+        if (localSearch) {
+          newParams.set('search', localSearch);
+        } else {
+          newParams.delete('search');
+        }
+        return newParams;
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localSearch, search, setSearchParams]);
 
   useEffect(() => {
     fetchTasks({ search, status, priority });
   }, [search, status, priority, fetchTasks]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (e.target.value) {
-      newParams.set('search', e.target.value);
-    } else {
-      newParams.delete('search');
-    }
-    setSearchParams(newParams);
+    setLocalSearch(e.target.value);
   };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -80,7 +101,7 @@ export const TaskBoard: React.FC = () => {
         <input 
           type="text" 
           placeholder="Search tasks..." 
-          value={search} 
+          value={localSearch} 
           onChange={handleSearchChange}
           className="search-input"
         />
